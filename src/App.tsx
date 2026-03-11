@@ -19,24 +19,39 @@ export default function App() {
   const { activeSection, setActiveSection } = useStore();
   const isScrolling = useRef(false);
   const prevSectionRef = useRef(activeSection);
-  const prevSectionForScrollRef = useRef(activeSection);
 
-  // 移动端：切换页面时自动滚动到顶部
+  // 移动端：切换页面时滚动到内容开始位置
   useEffect(() => {
-    const isMobile = () => {
-      return 'ontouchstart' in window && window.innerWidth < 1024;
+    const scrollToContentStart = () => {
+      // 获取当前页面的 section 元素并滚动到其开始位置
+      const section = document.querySelector(`#${activeSection}`);
+      if (section) {
+        section.scrollTop = 0;
+      }
+      // 同时确保 window 也在顶部
+      window.scrollTo({
+        top: 0,
+        behavior: 'auto'
+      });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     };
 
-    if (isMobile() && activeSection !== prevSectionForScrollRef.current) {
-      // 延迟滚动，确保页面切换动画开始后再滚动
+    const isMobile = () => {
+      return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    };
+
+    if (isMobile()) {
+      // 延迟执行，确保DOM渲染完成
       setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        // 同时重置任何可滚动容器
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
+        scrollToContentStart();
+      }, 50);
+
+      // 再次延迟确保动画完成后滚动
+      setTimeout(() => {
+        scrollToContentStart();
       }, 100);
     }
-    prevSectionForScrollRef.current = activeSection;
   }, [activeSection]);
 
   useEffect(() => {
@@ -115,6 +130,14 @@ export default function App() {
             isScrolling.current = true;
             prevSectionRef.current = activeSection;
             setActiveSection(sections[nextIndex]);
+            // 移动端切换页面时立即滚动到顶部
+            if (isMobile()) {
+              requestAnimationFrame(() => {
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+              });
+            }
             setTimeout(() => {
               isScrolling.current = false;
             }, 1200);

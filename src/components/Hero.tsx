@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ChevronDown } from 'lucide-react';
 import { useStore } from '../store';
@@ -10,15 +10,14 @@ export function Hero() {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { setActiveSection } = useStore();
-  const [showContent, setShowContent] = useState(false);
+  const { setActiveSection, hasVisitedIntro, setHasVisitedIntro } = useStore();
 
   const handleExplore = () => {
-    setShowContent(true);
+    setHasVisitedIntro(true);
   };
 
   useEffect(() => {
-    if (!showContent) return;
+    if (!hasVisitedIntro) return;
 
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
@@ -55,13 +54,13 @@ export function Hero() {
         });
       });
     }
-  }, [showContent]);
+  }, [hasVisitedIntro]);
 
   return (
     <section id="hero" className="h-screen w-screen flex flex-col justify-center relative overflow-hidden px-6 md:px-12 lg:px-20">
       {/* 初始状态：开始探索按钮 */}
       <AnimatePresence>
-        {!showContent && (
+        {!hasVisitedIntro && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -84,7 +83,7 @@ export function Hero() {
 
       {/* 原有内容 - 点击后显示 */}
       <AnimatePresence>
-        {showContent && (
+        {hasVisitedIntro && (
           <motion.div
             ref={containerRef}
             initial={{ opacity: 0 }}
@@ -134,7 +133,7 @@ export function Hero() {
       </AnimatePresence>
 
       {/* Scroll Indicator - 只在显示内容后显示 */}
-      {showContent && (
+      {hasVisitedIntro && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.5 }}

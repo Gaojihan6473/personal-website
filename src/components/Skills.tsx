@@ -56,7 +56,7 @@ export function Skills() {
   }, []);
 
   return (
-    <section id="skills" ref={sectionRef} className="h-full w-full relative flex flex-col justify-center overflow-y-auto py-20 px-6 md:px-12 lg:px-20">
+    <section id="skills" ref={sectionRef} className="h-full w-full relative flex flex-col justify-start lg:justify-center overflow-y-auto py-20 px-6 md:px-12 lg:px-20">
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#38dcf0]/20 to-transparent" />
       
       <div className="font-mono text-[#38dcf0] tracking-widest text-sm mb-6 uppercase flex items-center gap-4">

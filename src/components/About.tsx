@@ -1,46 +1,50 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Terminal, Cpu, Database } from 'lucide-react';
+import { useStore } from '../store';
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const { activeSection } = useStore();
 
   useEffect(() => {
+    // Only animate when this section is active
+    if (activeSection !== 'about') return;
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         contentRef.current,
-        { y: 50, opacity: 0 },
+        { y: 30, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.8,
-          ease: 'power3.out',
-          delay: 0.2
+          duration: 0.4,
+          ease: 'power2.out',
+          delay: 0.1
         }
       );
 
       gsap.fromTo(
         cardsRef.current?.children || [],
-        { y: 50, opacity: 0, scale: 0.9 },
+        { y: 20, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          scale: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: 'power3.out',
-          delay: 0.4
+          duration: 0.4,
+          stagger: 0,
+          ease: 'power2.out',
+          delay: 0.1
         }
       );
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [activeSection]);
 
   return (
-    <section id="about" ref={sectionRef} className="h-full w-full flex flex-col justify-center relative overflow-y-auto py-20 px-6 md:px-12 lg:px-20">
+    <section id="about" ref={sectionRef} className="h-full w-full flex flex-col justify-start lg:justify-center relative overflow-y-auto py-20 px-6 md:px-12 lg:px-20">
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#38dcf0]/20 to-transparent" />
       
       <div className="flex flex-col lg:flex-row gap-16 items-start">
