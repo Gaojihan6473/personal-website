@@ -19,6 +19,25 @@ export default function App() {
   const { activeSection, setActiveSection } = useStore();
   const isScrolling = useRef(false);
   const prevSectionRef = useRef(activeSection);
+  const prevSectionForScrollRef = useRef(activeSection);
+
+  // 移动端：切换页面时自动滚动到顶部
+  useEffect(() => {
+    const isMobile = () => {
+      return 'ontouchstart' in window && window.innerWidth < 1024;
+    };
+
+    if (isMobile() && activeSection !== prevSectionForScrollRef.current) {
+      // 延迟滚动，确保页面切换动画开始后再滚动
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // 同时重置任何可滚动容器
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 100);
+    }
+    prevSectionForScrollRef.current = activeSection;
+  }, [activeSection]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -63,17 +82,53 @@ export default function App() {
       }
     };
 
+    let touchStartX = 0;
     let touchStartY = 0;
+
+    // 检测是否为移动端（触摸设备且屏幕宽度小于1024px）
+    const isMobile = () => {
+      return 'ontouchstart' in window && window.innerWidth < 1024;
+    };
+
     const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (isScrolling.current) return;
-      
+
+      const touchEndX = e.touches[0].clientX;
       const touchEndY = e.touches[0].clientY;
+      const deltaX = touchStartX - touchEndX;
       const deltaY = touchStartY - touchEndY;
-      
+
+      // 移动端：左右滑动切换页面，上下滑动允许页面内滚动
+      if (isMobile()) {
+        // 水平滑动距离大于垂直滑动距离时，视为左右滑动切换页面
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+          const direction = deltaX > 0 ? 1 : -1; // 向左滑 = 下一页，向右滑 = 上一页
+          const currentIndex = sections.indexOf(activeSection);
+          let nextIndex = currentIndex + direction;
+
+          if (nextIndex >= 0 && nextIndex < sections.length) {
+            isScrolling.current = true;
+            prevSectionRef.current = activeSection;
+            setActiveSection(sections[nextIndex]);
+            setTimeout(() => {
+              isScrolling.current = false;
+            }, 1200);
+          }
+
+          // 重置起始位置，防止连续触发
+          touchStartX = touchEndX;
+          touchStartY = touchEndY;
+        }
+        // 上下滑动时允许自然滚动，不做处理
+        return;
+      }
+
+      // 桌面端：上下滑动切换页面（原有逻辑）
       if (Math.abs(deltaY) < 50) return; // Ignore small swipes
 
       let target = e.target as HTMLElement | null;
